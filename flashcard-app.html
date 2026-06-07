@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flashcard Quiz App</title>
+
+<style>
+    *{
+        margin:0;
+        padding:0;
+        box-sizing:border-box;
+        font-family:Arial, sans-serif;
+    }
+
+    body{
+        background:#f4f4f4;
+        display:flex;
+        justify-content:center;
+        align-items:center;
+        min-height:100vh;
+    }
+
+    .container{
+        width:90%;
+        max-width:600px;
+        background:white;
+        padding:25px;
+        border-radius:12px;
+        box-shadow:0 4px 10px rgba(0,0,0,0.2);
+    }
+
+    h1{
+        text-align:center;
+        margin-bottom:20px;
+        color:#333;
+    }
+
+    .flashcard{
+        border:2px solid #ddd;
+        border-radius:10px;
+        padding:25px;
+        text-align:center;
+        min-height:180px;
+    }
+
+    .flashcard h2{
+        color:#222;
+        margin-bottom:15px;
+    }
+
+    .flashcard p{
+        color:#555;
+        font-size:18px;
+    }
+
+    .hidden{
+        display:none;
+    }
+
+    .btn-group{
+        text-align:center;
+        margin-top:15px;
+    }
+
+    button{
+        padding:10px 15px;
+        margin:5px;
+        border:none;
+        border-radius:5px;
+        cursor:pointer;
+        background:#007bff;
+        color:white;
+        font-size:15px;
+    }
+
+    button:hover{
+        background:#0056b3;
+    }
+
+    .form{
+        margin-top:25px;
+    }
+
+    .form h3{
+        margin-bottom:10px;
+    }
+
+    input, textarea{
+        width:100%;
+        padding:10px;
+        margin:8px 0;
+        border:1px solid #ccc;
+        border-radius:5px;
+    }
+
+    textarea{
+        resize:none;
+        height:80px;
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Flashcard Quiz App</h1>
+
+    <div class="flashcard">
+        <h2 id="question"></h2>
+        <p id="answer" class="hidden"></p>
+
+        <div class="btn-group">
+            <button onclick="showAnswer()">Show Answer</button>
+        </div>
+    </div>
+
+    <div class="btn-group">
+        <button onclick="prevCard()">Previous</button>
+        <button onclick="nextCard()">Next</button>
+    </div>
+
+    <div class="form">
+        <h3>Add / Edit Flashcard</h3>
+
+        <input type="text" id="newQuestion" placeholder="Enter Question">
+
+        <textarea id="newAnswer" placeholder="Enter Answer"></textarea>
+
+        <div class="btn-group">
+            <button onclick="addCard()">Add Card</button>
+            <button onclick="editCard()">Edit Current</button>
+            <button onclick="deleteCard()">Delete Current</button>
+        </div>
+    </div>
+</div>
+
+<script>
+let flashcards = JSON.parse(localStorage.getItem("flashcards")) || [
+    {
+        question: "What is HTML?",
+        answer: "HyperText Markup Language"
+    },
+    {
+        question: "What is CSS?",
+        answer: "Cascading Style Sheets"
+    },
+    {
+        question: "What is JavaScript?",
+        answer: "A programming language used to make web pages interactive."
+    }
+];
+
+let currentIndex = 0;
+
+const question = document.getElementById("question");
+const answer = document.getElementById("answer");
+
+function saveCards() {
+    localStorage.setItem("flashcards", JSON.stringify(flashcards));
+}
+
+function loadCard() {
+    if (flashcards.length === 0) {
+        question.innerText = "No Flashcards Available";
+        answer.innerText = "";
+        return;
+    }
+
+    question.innerText = flashcards[currentIndex].question;
+    answer.innerText = flashcards[currentIndex].answer;
+    answer.classList.add("hidden");
+}
+
+function showAnswer() {
+    answer.classList.remove("hidden");
+}
+
+function nextCard() {
+    if (flashcards.length === 0) return;
+
+    currentIndex = (currentIndex + 1) % flashcards.length;
+    loadCard();
+}
+
+function prevCard() {
+    if (flashcards.length === 0) return;
+
+    currentIndex =
+        (currentIndex - 1 + flashcards.length) % flashcards.length;
+    loadCard();
+}
+
+function addCard() {
+    let q = document.getElementById("newQuestion").value.trim();
+    let a = document.getElementById("newAnswer").value.trim();
+
+    if (!q || !a) {
+        alert("Please enter both question and answer.");
+        return;
+    }
+
+    flashcards.push({
+        question: q,
+        answer: a
+    });
+
+    saveCards();
+
+    document.getElementById("newQuestion").value = "";
+    document.getElementById("newAnswer").value = "";
+
+    alert("Flashcard Added!");
+}
+
+function editCard() {
+    if (flashcards.length === 0) return;
+
+    let q = document.getElementById("newQuestion").value.trim();
+    let a = document.getElementById("newAnswer").value.trim();
+
+    if (!q || !a) {
+        alert("Enter updated question and answer.");
+        return;
+    }
+
+    flashcards[currentIndex] = {
+        question: q,
+        answer: a
+    };
+
+    saveCards();
+    loadCard();
+
+    alert("Flashcard Updated!");
+}
+
+function deleteCard() {
+    if (flashcards.length === 0) return;
+
+    flashcards.splice(currentIndex, 1);
+
+    if (currentIndex >= flashcards.length) {
+        currentIndex = 0;
+    }
+
+    saveCards();
+    loadCard();
+
+    alert("Flashcard Deleted!");
+}
+
+loadCard();
+</script>
+
+</body>
+</html>
